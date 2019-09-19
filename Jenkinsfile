@@ -1,17 +1,13 @@
 timestamps{
     node('maven'){
-       
         stage('Checkout'){
-           // checkout scm
-           checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/feitais/gs-spring-boot.git']]])
+           checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
         }
         stage('Cleanup'){
-            sh 'oc delete all -l app=maven -n maven-test'
+            sh 'oc delete all -l app=maven -n maven-backend'
+            sh 'oc delete pvc -l app=maven -n maven-backend'
          }
-        stage ('Create PVC') {
-            sh 'oc apply -f glusterfs-dyn-pvc.yaml -n maven-test'
-        }
-        stage('Build'){
+        stage('Compile'){
             sh 'mvn clean install'
         }
         stage('Code Quality'){
@@ -28,17 +24,12 @@ timestamps{
                 }
             }
         }
-        stage('Build oc'){
-            sh 'oc new-build --name=maven-spring openshift/java --binary=true -l app=maven -n maven-test'
-            sh 'oc start-build maven-spring --from-dir=target --follow -n maven-test'
+        stage('Build'){
+            sh 'oc new-build --name=maven-spring openshift/java --binary=true -l app=maven -n maven-backend'
+            sh 'oc start-build maven-spring --from-dir=target --follow -n maven-backend'
         }
-        stage('Deploy oc'){
-            sh 'oc new-app maven-spring -n maven-test -l app=maven'
-            sh 'oc set volume dc/maven-spring --add --name=volume-log -t persistentVolumeClaim --mount-path=/logs --claim-name log -n maven-test'
-        }
-        stage('Expose Route'){
-            //sh 'oc expose svc/maven-spring -n maven-test'
-            sh 'oc create route edge maven-spring --insecure-policy=Redirect --service=maven-spring -n maven-test'
+        stage('Deploy'){
+            sh "oc new-app --file=template-maven.yml --param=LABEL=maven --param=NAME=maven-spring --namespace=maven-backend"
         }
     }
 }
