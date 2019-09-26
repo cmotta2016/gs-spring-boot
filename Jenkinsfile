@@ -1,11 +1,12 @@
 timestamps{
     node('maven'){
         stage('Checkout'){
-           checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
+           //checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
+           checkout scm
         }
         stage('Cleanup'){
-            sh 'oc delete all -l app=maven -n maven-backend'
-            sh 'oc delete pvc -l app=maven -n maven-backend'
+            sh 'oc delete all -l app=maven -n maven-backend-qa'
+            sh 'oc delete pvc -l app=maven -n maven-backend-qa'
          }
         stage('Compile'){
             sh 'mvn clean install'
@@ -25,11 +26,11 @@ timestamps{
             }
         }
         stage('Build'){
-            sh 'oc new-build --name=maven-spring openshift/java --binary=true -l app=maven -n maven-backend'
-            sh 'oc start-build maven-spring --from-dir=target --follow -n maven-backend'
+            sh 'oc new-build --name=maven-spring openshift/java --binary=true -l app=maven -n maven-backend-qa'
+            sh 'oc start-build maven-spring --from-dir=target --follow -n maven-backend-qa'
         }
         stage('Deploy'){
-            sh "oc new-app --file=template-maven.yml --param=LABEL=maven --param=NAME=maven-spring --namespace=maven-backend"
+            sh "oc new-app --file=template-maven.yml --param=LABEL=maven --param=NAME=maven-spring --namespace=maven-backend-qa"
         }
     }
 }
