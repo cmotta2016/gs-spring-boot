@@ -42,6 +42,8 @@ spec:
     component: web
     app: maven
   spec:
+   securityContext:
+    runAsUser: 0
    volumes:
     - name: logs
       persistentVolumeClaim:
