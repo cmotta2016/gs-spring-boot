@@ -28,7 +28,7 @@ timestamps{
         stage('Build S2I'){
             /*sh 'oc new-build --name=maven-spring openshift/java --binary=true -l app=maven -n maven-backend'
             sh 'oc start-build maven-spring --from-dir=target --follow -n maven-backend'*/
-            sh 's2i build . fabric8/java-main cmotta2016/k8s-maven --loglevel 1 --network host'
+            sh 's2i build . fabric8/s2i-java cmotta2016/k8s-maven --loglevel 1 --network host'
         }
         /*stage('Deploy'){
             sh "oc new-app --file=template-maven.yml --param=LABEL=maven --param=NAME=maven-spring --namespace=maven-backend"
