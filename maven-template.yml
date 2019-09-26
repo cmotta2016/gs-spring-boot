@@ -12,6 +12,19 @@ spec:
   - port: 8080
     targetPort: 8080
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: maven
+  name: logs
+spec:
+ accessModes:
+ - ReadWriteOnce
+ resources:
+   requests:
+     storage: 2Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,8 +42,15 @@ spec:
     component: web
     app: maven
   spec:
+   volumes:
+    - name: logs
+      persistentVolumeClaim:
+        claimName: logs
    containers: 
     - name: maven
       image: cmotta2016/k8s-maven
       ports:
        - containerPort: 8080
+      volumeMounts:
+       - mountPath: /logs
+         name: logs
