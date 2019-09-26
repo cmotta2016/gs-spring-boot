@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: maven-service
+ labels:
+   app: maven
+spec:
+ type: LoadBalancer
+ selector:
+  component: web
+ ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ labels:
+   app: maven
+ name: maven
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   component: web
+ template:
+  metadata:
+   labels:
+    component: web
+    app: maven
+  spec:
+   containers: 
+    - name: maven
+      image: cmotta2016/k8s-maven
+      ports:
+       - containerPort: 8080
