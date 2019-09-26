@@ -16,7 +16,7 @@ timestamps{
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }
         }
-        stage('Quality gate'){
+        stage('Quality Gate'){
             timeout(activity: true, time: 15, unit: 'SECONDS') {
                 sleep(10)
                 def qg = waitForQualityGate()
