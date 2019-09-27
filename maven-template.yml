@@ -50,7 +50,7 @@ spec:
         claimName: logs
    containers: 
     - name: maven
-      image: cmotta2016/k8s-maven
+      image: k8s-images/maven
       ports:
        - containerPort: 8080
       volumeMounts:
