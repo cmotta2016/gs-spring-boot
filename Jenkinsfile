@@ -22,14 +22,14 @@ timestamps{
             }
         }
         stage('Build S2I'){
-            sh 's2i build . fabric8/s2i-java cmotta2016/k8s-maven --loglevel 1 --network host'
+            sh 's2i build . fabric8/s2i-java k8s-images/maven --loglevel 1 --network host'
         }
         stage('Push Image'){
-            withCredentials([usernamePassword(credentialsId: 'docker-io', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+            withCredentials([usernamePassword(credentialsId: 'nexus_oci', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
             sh '''
             docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-            docker push cmotta2016/k8s-maven
-            docker rmi -f cmotta2016/k8s-maven
+            docker push k8s-images/maven
+            docker rmi -f k8s-images/maven
             '''
             }
         }
