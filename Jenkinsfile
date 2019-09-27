@@ -27,7 +27,7 @@ timestamps{
         stage('Push Image'){
             withCredentials([usernamePassword(credentialsId: 'nexus_oci', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
             sh '''
-            docker login cicdtools.oracle.msdigital.pro:8081 -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+            docker login http://cicdtools.oracle.msdigital.pro:8081 -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
             docker tag k8s-images/maven cicdtools.oracle.msdigital.pro:8081/k8s-images/maven
             docker push cicdtools.oracle.msdigital.pro:8081/k8s-images/maven
             docker rmi -f k8s-images/maven cicdtools.oracle.msdigital.pro:8081/k8s-images/maven
