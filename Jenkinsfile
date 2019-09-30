@@ -1,36 +1,41 @@
 timestamps{
     node('maven'){
         stage('Checkout'){
-           //checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
+           //checkout([$class: 'GitSCM', branches: [[name: '*/openshift']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
            checkout scm
-        }
-        stage('Cleanup'){
-            sh 'oc delete all -l app=maven -n maven-backend-qa'
-            sh 'oc delete pvc -l app=maven -n maven-backend-qa'
-         }
+        }//stage
         stage('Compile'){
             sh 'mvn clean install'
-        }
+        }//stage
         stage('Code Quality'){
             withSonarQubeEnv('SonarQube') { 
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
-            }
-        }
+            }//withSonarQubeEnv
+        }//stage
         stage('Quality Gate'){
             timeout(activity: true, time: 15, unit: 'SECONDS') {
                 sleep(10)
                 def qg = waitForQualityGate()
                 if (qg.status != 'OK') {
                     error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                }
-            }
-        }
-        stage('Build'){
-            sh 'oc new-build --name=maven-spring openshift/java --binary=true -l app=maven -n maven-backend-qa'
-            sh 'oc start-build maven-spring --from-dir=target --follow -n maven-backend-qa'
-        }
-        stage('Deploy'){
-            sh "oc new-app --file=template-maven.yml --param=LABEL=maven --param=NAME=maven-spring --namespace=maven-backend-qa"
-        }
-    }
-}
+                }//if
+            }//timeout
+        }//stage
+        openshift.withCluster() {
+            openshift.withProject('maven-backend-qa') {
+                stage('Create Build'){
+                    echo "Criando build config da imagem final..."
+                    if (!openshift.selector("bc", "maven-spring").exists()) {
+                        openshift.newBuild("--name=maven-spring", "openshift/java", "--binary", "-l app=maven")
+                        def build = openshift.selector("bc", "maven-spring").startBuild("--from-dir=target")
+                        build.logs('-f')
+                    }//if
+                    else {
+                        def build = openshift.selector("bc", "maven-spring").startBuild("--from-dir=target")
+                        build.logs('-f')
+                    }
+                    }//stage
+            }//withProject
+        }//withCluster
+    }//node
+}//timestamps
