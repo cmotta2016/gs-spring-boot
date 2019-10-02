@@ -36,6 +36,13 @@ timestamps{
                     }
                     }//stage
             }//withProject
+            openshift.withProject('node-backend-prd') {
+                stage('Deploy') {
+                    openshift.selector("dc", "maven-spring").rollout()
+                    def dc = openshift.selector("dc", "maven-spring")
+                    dc.rollout().status()
+                }//stage
+            }//withProject
         }//withCluster
     }//node
 }//timestamps
