@@ -38,7 +38,7 @@ timestamps{
             }//withProject
             openshift.withProject('maven-backend-prd') {
                 stage('Deploy') {
-                    openshift.selector("dc", "maven-spring").rollout()
+                    openshift.selector("dc", "maven-spring").rollout().latest()
                     def dc = openshift.selector("dc", "maven-spring")
                     dc.rollout().status()
                 }//stage
