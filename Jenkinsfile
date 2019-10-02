@@ -1,8 +1,8 @@
 timestamps{
     node('maven'){
         stage('Checkout'){
-           //checkout([$class: 'GitSCM', branches: [[name: '*/openshift']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
-           checkout scm
+           checkout([$class: 'GitSCM', branches: [[name: '*/openshift']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
+           //checkout scm
         }//stage
         stage('Compile'){
             sh 'mvn clean install'
@@ -38,6 +38,7 @@ timestamps{
             }//withProject
             openshift.withProject('maven-backend-prd') {
                 stage('Deploy') {
+                    openshift.tag("maven-backend-qa/maven-spring:latest", "maven-backend-prd/maven-spring:latest")
                     openshift.selector("dc", "maven-spring").rollout().latest()
                     def dc = openshift.selector("dc", "maven-spring")
                     dc.rollout().status()
