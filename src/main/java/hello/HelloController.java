@@ -27,7 +27,7 @@ public class HelloController {
         logger.info("Greetings from Spring Boot!");  
         fh.close();
     	
-        return "Greetings from Spring Boot v2!";
+        return "Greetings from Spring Boot!";
     }
 
 }
