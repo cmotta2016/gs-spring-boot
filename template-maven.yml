@@ -133,6 +133,3 @@ parameters:
   displayName: App label
   required: true
   value: maven
-- name: AUTO
-  displayName: Automatic deploy after image change
-  required: true
