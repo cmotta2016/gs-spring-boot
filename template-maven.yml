@@ -70,7 +70,7 @@ objects:
     triggers:
     - type: ConfigChange
     - imageChangeParams:
-        automatic: true #If "true", the deployment will updated automaticaly after build update imagestream
+        automatic: "${AUTO}" #If "true", the deployment will updated automaticaly after build update imagestream
         containerNames:
         - "${NAME}"
         from: 
@@ -133,3 +133,6 @@ parameters:
   displayName: App label
   required: true
   value: maven
+- name: AUTO
+  displayName: Automatic deploy after image change
+  required: true
