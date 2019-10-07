@@ -70,7 +70,7 @@ objects:
     triggers:
     - type: ConfigChange
     - imageChangeParams:
-        "${AUTO}"
+        #automatic: true
         containerNames:
         - "${NAME}"
         from: 
