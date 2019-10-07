@@ -21,7 +21,7 @@ timestamps{
                 }//if
             }//timeout
         }//stage
-        openshift.withCluster() {
+        /*openshift.withCluster() {
             openshift.withProject('maven-backend-qa') {
                 stage('Create Build'){
                     echo "Criando build config da imagem final..."
@@ -44,6 +44,6 @@ timestamps{
                     dc.rollout().status()
                 }//stage
             }//withProject
-        }//withCluster
+        }//withCluster*/
     }//node
 }//timestamps
