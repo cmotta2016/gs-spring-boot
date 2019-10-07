@@ -63,14 +63,14 @@ objects:
       app: "${LABEL}"
     name: "${NAME}"
     annotations:
-      template.alpha.openshift.io/wait-for-ready: "true"
+      template.alpha.openshift.io/wait-for-ready: "true" #Template instantiation will not complete until this object report ready
   spec:
     strategy:
       type: "Rolling"
     triggers:
     - type: ConfigChange
     - imageChangeParams:
-        automatic: true
+        automatic: true #If "true", the deployment will updated automaticaly after build update imagestream
         containerNames:
         - "${NAME}"
         from: 
@@ -104,6 +104,26 @@ objects:
           volumeMounts:
             - mountPath: /logs
               name: "${NAME}-log"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
 parameters:
 - name: NAME
   displayName: Name
