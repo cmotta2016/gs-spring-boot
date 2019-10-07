@@ -36,14 +36,14 @@ timestamps{
                     }
                     }//stage
             }//withProject
-            openshift.withProject('maven-backend-hml') {
+            /*openshift.withProject('maven-backend-hml') {
                 stage('Deploy') {
                     openshift.tag("maven-backend-qa/maven-spring:latest", "maven-backend-hml/maven-spring:latest")
                     openshift.selector("dc", "maven-spring").rollout().latest()
                     def dc = openshift.selector("dc", "maven-spring")
                     dc.rollout().status()
                 }//stage
-            }//withProject
+            }//withProject*/
         }//withCluster
     }//node
 }//timestamps
