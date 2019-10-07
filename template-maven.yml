@@ -62,6 +62,8 @@ objects:
     labels:
       app: "${LABEL}"
     name: "${NAME}"
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
   spec:
     strategy:
       type: "Rolling"
