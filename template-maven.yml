@@ -70,7 +70,7 @@ objects:
     triggers:
     - type: ConfigChange
     - imageChangeParams:
-        automatic: "${AUTO}" #If "true", the deployment will updated automaticaly after build update imagestream
+        automatic: "${AUTO}"
         containerNames:
         - "${NAME}"
         from: 
