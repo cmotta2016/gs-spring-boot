@@ -4,6 +4,8 @@ labels:
   template: maven-spring-template
 metadata:
   name: maven-spring-template
+  annotations:  
+    template.alpha.openshift.io/wait-for-ready: 'true'
 objects:
 - apiVersion: v1
   kind: Service
@@ -109,8 +111,8 @@ objects:
               path: /
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 10
-            timeoutSeconds: 2
+            initialDelaySeconds: 360
+            timeoutSeconds: 180
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
@@ -119,8 +121,8 @@ objects:
               path: /
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 30
-            timeoutSeconds: 2
+            initialDelaySeconds: 3
+            timeoutSeconds: 180
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
