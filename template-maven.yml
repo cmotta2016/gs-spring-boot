@@ -72,7 +72,7 @@ objects:
     triggers:
     - type: ConfigChange
     - imageChangeParams:
-        #automatic: true
+        automatic: false
         containerNames:
         - "${NAME}"
         from: 
@@ -96,6 +96,13 @@ objects:
         containers:
         - image: " "
           name: "${NAME}"
+          resources:
+            limits:
+              cpu: '1'
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 512Mi
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -126,6 +133,20 @@ objects:
             periodSeconds: 10
             successThreshold: 1
             failureThreshold: 3
+- apiVersion: autoscaling/v1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    labels:
+      app: "${LABEL}"
+    name: "${NAME}"
+spec:
+  maxReplicas: 3
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: v1
+    kind: DeploymentConfig
+    name: "${NAME}"
+  targetCPUUtilizationPercentage: 80
 parameters:
 - name: NAME
   displayName: Name
