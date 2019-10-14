@@ -139,14 +139,14 @@ objects:
     labels:
       app: "${LABEL}"
     name: "${NAME}"
-spec:
-  maxReplicas: 3
-  minReplicas: 1
-  scaleTargetRef:
-    apiVersion: v1
-    kind: DeploymentConfig
-    name: "${NAME}"
-  targetCPUUtilizationPercentage: 80
+  spec:
+    maxReplicas: 3
+    minReplicas: 1
+    scaleTargetRef:
+      apiVersion: v1
+      kind: DeploymentConfig
+      name: "${NAME}"
+    targetCPUUtilizationPercentage: 80
 parameters:
 - name: NAME
   displayName: Name
