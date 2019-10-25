@@ -96,6 +96,9 @@ objects:
         containers:
         - image: " "
           name: "${NAME}"
+          envFrom:
+            - secretRef:
+                name: "${SECRET_ENV}"
           resources:
             limits:
               cpu: '1'
@@ -156,3 +159,6 @@ parameters:
   displayName: App label
   required: true
   value: maven
+- name: SECRET_ENV
+  displayName: Secret environments name
+  required: true
