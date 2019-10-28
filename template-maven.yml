@@ -19,14 +19,6 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
-    - name: 8443-tcp
-      port: 8443
-      protocol: TCP
-      targetPort: 8443
-    - name: 8778-tcp
-      port: 8778
-      protocol: TCP
-      targetPort: 8778
     selector:
       app: "${LABEL}"
       deploymentconfig: "${NAME}"
@@ -102,16 +94,12 @@ objects:
           resources:
             limits:
               cpu: '1'
-              memory: 1Gi
+              memory: 2Gi
             requests:
-              cpu: 100m
+              cpu: 250m
               memory: 512Mi
           ports:
             - containerPort: 8080
-              protocol: TCP
-            - containerPort: 8443
-              protocol: TCP
-            - containerPort: 8778
               protocol: TCP
           volumeMounts:
             - mountPath: /logs
@@ -131,7 +119,7 @@ objects:
               path: /
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 3
+            initialDelaySeconds: 10
             timeoutSeconds: 180
             periodSeconds: 10
             successThreshold: 1
@@ -149,7 +137,7 @@ objects:
       apiVersion: v1
       kind: DeploymentConfig
       name: "${NAME}"
-    targetCPUUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 90
 parameters:
 - name: NAME
   displayName: Name
