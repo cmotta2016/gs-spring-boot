@@ -1,2 +1,4 @@
 SPRING_DATA_MONGODB_URI=http://mongo.test.com
+
+
 REDIS=redis://redis.test.com
