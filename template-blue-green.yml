@@ -121,6 +121,9 @@ objects:
         containers:
         - image: " "
           name: ${NAME}
+          envFrom:
+            - secretRef:
+                name: "${SECRET_ENV}"
           resources:
             limits:
               cpu: '1'
@@ -210,6 +213,9 @@ objects:
         containers:
         - image: " "
           name: ${NAME}
+          envFrom:
+            - secretRef:
+                name: "${SECRET_ENV}"
           resources:
             limits:
               cpu: '1'
@@ -251,4 +257,7 @@ parameters:
 - description: The label assigned to all of the frontend objects defined in this template.
   displayName: App label
   name: LABEL
+  required: true
+- name: SECRET_ENV
+  displayName: Secret environments name
   required: true
