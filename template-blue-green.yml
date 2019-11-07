@@ -285,3 +285,6 @@ parameters:
 - name: SECRET_ENV
   displayName: Secret environments name
   required: true
+- name: REPOSITORY
+  displayName: Project repository containing images
+  required: true
