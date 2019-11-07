@@ -88,7 +88,7 @@ objects:
       app: ${LABEL}
     name: ${NAME}-blue
     annotations:
-      template.alpha.openshift.io/wait-for-ready: "true"
+      template.alpha.openshift.io/wait-for-ready: "true" #Template instantiation will not complete until this object report ready
   spec:
     strategy:
       type: "Rolling"
@@ -121,9 +121,6 @@ objects:
         containers:
         - image: " "
           name: ${NAME}
-          envFrom:
-            - secretRef:
-                name: "${SECRET_ENV}"
           resources:
             limits:
               cpu: '1'
@@ -180,7 +177,7 @@ objects:
       app: ${LABEL}
     name: ${NAME}-green
     annotations:
-      template.alpha.openshift.io/wait-for-ready: "true"
+      template.alpha.openshift.io/wait-for-ready: "true" #Template instantiation will not complete until this object report ready
   spec:
     strategy:
       type: "Rolling"
@@ -213,9 +210,6 @@ objects:
         containers:
         - image: " "
           name: ${NAME}
-          envFrom:
-            - secretRef:
-                name: "${SECRET_ENV}"
           resources:
             limits:
               cpu: '1'
