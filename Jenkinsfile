@@ -43,7 +43,7 @@ timestamps{
                     openshift.apply(openshift.process(readFile(file:'template-blue-green.yml'), "--param-file=jenkins.properties"))
                 }//stage
                 stage('Tagging Image'){
-                    openshift.tag("${NAME}:latest", "${NAME}:${tag}")
+                    openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
                 }//stage
                 stage("Starting Deploy") {
                     echo "Starting Deploy PRD"
