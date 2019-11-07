@@ -101,6 +101,7 @@ objects:
         from: 
           kind: ImageStreamTag
           name: "${NAME}:blue"
+          namespace: "${REPOSITORY}"
       type: ImageChange
     replicas: 1
     selector:
@@ -204,6 +205,7 @@ objects:
         from: 
           kind: ImageStreamTag
           name: "${NAME}:green"
+          namespace: "${REPOSITORY}"
       type: ImageChange
     replicas: 1
     selector:
