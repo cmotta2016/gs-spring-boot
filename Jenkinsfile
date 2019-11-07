@@ -4,7 +4,8 @@ timestamps{
     def routeHost="${tag}-${NAME}-${PROJECT}-qa.apps.openshift.oracle.msdigital.pro"
     node('maven'){
         stage('Checkout'){
-           checkout([$class: 'GitSCM', branches: [[name: '*/blue-green']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
+           //checkout([$class: 'GitSCM', branches: [[name: '*/blue-green']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
+            checkout scm
         }//stage
         stage('Compile'){
             sh 'mvn clean install'
