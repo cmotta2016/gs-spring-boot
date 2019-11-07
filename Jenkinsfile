@@ -1,7 +1,7 @@
 timestamps{
     def tag="blue"
     def altTag="green"
-    def routeHost="${tag}-${NAME}-${PROJECT}-qa.apps.openshift.oracle.msdigital.pro"
+    def routeHost="${tag}-${NAME}-${PROJECT}-prd.apps.openshift.oracle.msdigital.pro"
     node('maven'){
         stage('Checkout'){
            //checkout([$class: 'GitSCM', branches: [[name: '*/blue-green']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
@@ -11,7 +11,7 @@ timestamps{
             sh 'mvn clean install'
         }//stage
         openshift.withCluster() {
-            openshift.withProject("${PROJECT}-qa") {
+            openshift.withProject("${PROJECT}-prd") {
                 stage("Initializing Routes") {
                     if (openshift.selector("route", "${NAME}").exists()) {
                       def activeService = openshift.raw("get route ${NAME} -o jsonpath='{ .spec.to.name }' --loglevel=4").out.trim()
@@ -34,19 +34,19 @@ timestamps{
                         build.logs('-f')
                         }//else
                 }//stage
-                stage('Deploy QA') {
+                stage('Applying Template') {
                     echo "Creating Secret Environments"
                     sh 'cat environments common > .env_qa'
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
-                    echo "Applying Template QA"
+                    echo "Applying Template PRD"
                     openshift.apply(openshift.process(readFile(file:'template-blue-green.yml'), "--param-file=jenkins.properties"))
                 }//stage
                 stage('Tagging Image'){
                     openshift.tag("${NAME}:latest", "${NAME}:${tag}")
                 }//stage
                 stage("Starting Deploy") {
-                    echo "Starting Deploy QA"
+                    echo "Starting Deploy PRD"
                     openshift.selector("dc", "${NAME}-${tag}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}-${tag}")
                     dc.rollout().status()
@@ -55,7 +55,7 @@ timestamps{
                     input message: "Test deployment: http://${routeHost}. Approve?", id: "approval"
                 }//stage
                 stage("Go Live") {
-                    openshift.raw("set -n ${PROJECT}-qa route-backends ${NAME} ${NAME}-${tag}=100 ${NAME}-${altTag}=0 --loglevel=4").out
+                    openshift.raw("set route-backends ${NAME} ${NAME}-${tag}=100 ${NAME}-${altTag}=0 --loglevel=4").out
                 }//stage
             }//withProject
         }//withCluster
