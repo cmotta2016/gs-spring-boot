@@ -1,26 +1,26 @@
 timestamps{
     def tag="blue"
     def altTag="green"
+    def routeHost="${tag}-${NAME}-${PROJECT}-qa.apps.openshift.oracle.msdigital.pro"
     node('maven'){
-        stage("Initializing Routes") {
-            sh "oc get route ${NAME} -n ${PROJECT}-qa -o jsonpath='{ .spec.to.name }' --loglevel=4 > activeservice"
-            activeService = readFile('activeservice').trim()
-            if (activeService == "${NAME}-blue") {
-            tag = "green"
-            altTag = "blue"
-            }//if
-            sh "oc get route ${tag}-${NAME} -n ${PROJECT}-qa -o jsonpath='{ .spec.host }' --loglevel=4 > routehost"
-            routeHost = readFile('routehost').trim()
-        }//stage
         stage('Checkout'){
-           checkout([$class: 'GitSCM', branches: [[name: '*/openshift']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
-           //checkout scm
+           checkout([$class: 'GitSCM', branches: [[name: '*/blue-green']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
         }//stage
         stage('Compile'){
             sh 'mvn clean install'
         }//stage
         openshift.withCluster() {
             openshift.withProject("${PROJECT}-qa") {
+                stage("Initializing Routes") {
+                    if (openshift.selector("route", "${NAME}").exists()) {
+                      def activeService = openshift.raw("get route ${NAME} -o jsonpath='{ .spec.to.name }' --loglevel=4").out.trim()
+                      if (activeService == "${NAME}-blue") {
+                        tag = "green"
+                        altTag = "blue"
+                      }//if
+                      routeHost = openshift.raw("get route ${tag}-${NAME} -o jsonpath='{ .spec.host }' --loglevel=4").out.trim()
+                    }//if
+                }//stage
                 stage('Build'){
                     echo "Criando build config da imagem final..."
                     if (!openshift.selector("bc", "${NAME}").exists()) {
@@ -54,7 +54,7 @@ timestamps{
                     input message: "Test deployment: http://${routeHost}. Approve?", id: "approval"
                 }//stage
                 stage("Go Live") {
-                    sh "oc set -n ${PROJECT}-qa route-backends ${NAME} ${NAME}-${tag}=100 ${NAME}-${altTag}=0 --loglevel=4"
+                    openshift.raw("set -n ${PROJECT}-qa route-backends ${NAME} ${NAME}-${tag}=100 ${NAME}-${altTag}=0 --loglevel=4").out
                 }//stage
             }//withProject
         }//withCluster
