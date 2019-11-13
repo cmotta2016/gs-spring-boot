@@ -39,32 +39,32 @@ objects:
       kind: Service
       name: ${NAME}-blue
       weight: 100
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    labels:
-      app: ${LABEL}
-    name: "${NAME}-blue"
-  spec:
-   accessModes:
-   - ReadWriteOnce
-   resources:
-     requests:
-       storage: 2Gi
-   storageClassName: glusterfs-storage
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    labels:
-      app: ${LABEL}
-    name: "${NAME}-green"
-  spec:
-   accessModes:
-   - ReadWriteOnce
-   resources:
-     requests:
-       storage: 2Gi
-   storageClassName: glusterfs-storage
+#- apiVersion: v1
+#  kind: PersistentVolumeClaim
+#  metadata:
+#    labels:
+#      app: ${LABEL}
+#    name: "${NAME}-blue"
+#  spec:
+#   accessModes:
+#   - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 2Gi
+#   storageClassName: glusterfs-storage
+#- apiVersion: v1
+#  kind: PersistentVolumeClaim
+#  metadata:
+#    labels:
+#      app: ${LABEL}
+#    name: "${NAME}-green"
+#  spec:
+#   accessModes:
+#   - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 2Gi
+#   storageClassName: glusterfs-storage
 - apiVersion: v1
   kind: Service
   metadata:
@@ -115,10 +115,10 @@ objects:
           deploymentconfig: ${NAME}
           name: ${NAME}-blue
       spec:
-        volumes:
-        - name: "${NAME}-blue"
-          persistentVolumeClaim:
-            claimName: "${NAME}-blue"
+#        volumes:
+#        - name: "${NAME}-blue"
+#          persistentVolumeClaim:
+#            claimName: "${NAME}-blue"
         containers:
         - image: " "
           name: ${NAME}
@@ -132,9 +132,9 @@ objects:
           ports:
             - containerPort: 8080
               protocol: TCP
-          volumeMounts:
-            - mountPath: /logs
-              name: "${NAME}-blue"
+#          volumeMounts:
+#            - mountPath: /logs
+#              name: "${NAME}-blue"
           livenessProbe:
             httpGet:
               path: /
@@ -219,10 +219,10 @@ objects:
           deploymentconfig: ${NAME}
           name: ${NAME}-green
       spec:
-        volumes:
-        - name: "${NAME}-green"
-          persistentVolumeClaim:
-            claimName: "${NAME}-green"
+#        volumes:
+#        - name: "${NAME}-green"
+#          persistentVolumeClaim:
+#            claimName: "${NAME}-green"
         containers:
         - image: " "
           name: ${NAME}
@@ -236,9 +236,9 @@ objects:
           ports:
             - containerPort: 8080
               protocol: TCP
-          volumeMounts:
-            - mountPath: /logs
-              name: "${NAME}-green"
+#          volumeMounts:
+#            - mountPath: /logs
+#              name: "${NAME}-green"
           livenessProbe:
             httpGet:
               path: /
