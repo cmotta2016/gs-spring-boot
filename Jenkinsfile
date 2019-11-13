@@ -40,7 +40,7 @@ timestamps{
                     }//stage
                 stage('Tagging Image'){
 		    openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
-                    openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
+                    //openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
                 }//stage
 		stage('Deploy QA') {
                     echo "Creating Secret Environments"
@@ -79,6 +79,9 @@ timestamps{
                       }//if
                       routeHost = openshift.raw("get route ${tag}-${NAME} -o jsonpath='{ .spec.host }' --loglevel=4").out.trim()
                     }//if
+                }//stage
+                stage('Re-tagging Image'){
+                    openshift.tag("${REPOSITORY}/${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
                 }//stage
                 stage('Deploy PRD') {
                     echo "Creating Secret Environments"
