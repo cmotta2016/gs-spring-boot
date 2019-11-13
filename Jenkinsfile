@@ -39,17 +39,17 @@ timestamps{
                     }//else
                     }//stage
                 stage('Tagging Image'){
-		            openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
+		    openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
                     openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
                 }//stage
-		        stage('Deploy QA') {
+		stage('Deploy QA') {
                     echo "Creating Secret Environments"
                     sh 'cat environments common > .env_qa'
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
-		            echo "Applying Template QA"
+		    echo "Applying Template QA"
                     openshift.apply(openshift.process(readFile(file:'template.yml'), "--param-file=jenkins.properties"))
-		            echo "Starting Deployment QA"
+		    echo "Starting Deployment QA"
                     openshift.selector("dc", "${NAME}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}")
                     dc.rollout().status()
@@ -61,9 +61,9 @@ timestamps{
                     sh 'cat environments common > .env_hml'
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_hml --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
-		            echo "Applying Template HML"
+		    echo "Applying Template HML"
                     openshift.apply(openshift.process(readFile(file:'template.yml'), "--param-file=jenkins.properties"))
-		            echo "Starting Deployment HML"
+		    echo "Starting Deployment HML"
                     openshift.selector("dc", "${NAME}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}")
                     dc.rollout().status()
