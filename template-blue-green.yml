@@ -30,6 +30,7 @@ objects:
   metadata:
     labels:
       app: ${LABEL}
+      name: "principal"
     name: ${NAME}
   spec:
     alternateBackends:
