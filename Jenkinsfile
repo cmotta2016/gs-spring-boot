@@ -89,7 +89,8 @@ timestamps{
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_prd --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
                     echo "Applying Template PRD"
-                    openshift.apply(openshift.process(readFile(file:'template-blue-green.yml'), "--param-file=jenkins.properties"))
+                    //openshift.apply(openshift.process(readFile(file:'template-blue-green.yml'), "--param-file=jenkins.properties"), "-l name!=principal")
+		    openshift.apply(openshift.process(readFile(file:'template-blue-green.yml'), "--param-file=jenkins.properties"))
                     echo "Starting Deployment PRD"
                     openshift.selector("dc", "${NAME}-${tag}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}-${tag}")
