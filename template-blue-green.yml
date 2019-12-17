@@ -164,7 +164,7 @@ objects:
     name: ${NAME}-blue
   spec:
     maxReplicas: 10
-    minReplicas: 3
+    minReplicas: 1
     scaleTargetRef:
       apiVersion: v1
       kind: DeploymentConfig
@@ -268,7 +268,7 @@ objects:
     name: ${NAME}-green
   spec:
     maxReplicas: 10
-    minReplicas: 3
+    minReplicas: 1
     scaleTargetRef:
       apiVersion: v1
       kind: DeploymentConfig
