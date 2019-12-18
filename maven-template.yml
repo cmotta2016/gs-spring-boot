@@ -5,7 +5,8 @@ metadata:
  labels:
    app: maven
 spec:
- type: LoadBalancer
+ #type: LoadBalancer
+ type: NodePort
  selector:
   component: web
  ports:
@@ -24,6 +25,7 @@ spec:
  resources:
    requests:
      storage: 2Gi
+ storageClassName: glusterfs-storage
 ---
 apiVersion: apps/v1
 kind: Deployment
