@@ -92,13 +92,13 @@ objects:
           envFrom:
             - secretRef:
                 name: "${SECRET_ENV}"
-          resources:
-            limits:
-              cpu: '1'
-              memory: 2Gi
-            requests:
-              cpu: 250m
-              memory: 512Mi
+          #resources:
+          #  limits:
+          #    cpu: '1'
+          #    memory: 2Gi
+          #  requests:
+          #    cpu: 250m
+          #    memory: 512Mi
           ports:
             - containerPort: 8080
               protocol: TCP
