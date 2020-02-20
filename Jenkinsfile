@@ -7,7 +7,7 @@ timestamps{
         stage('Compile'){
             sh 'mvn clean install'
         }//stage
-        stage('Code Quality'){
+        /*stage('Code Quality'){
             withSonarQubeEnv('SonarQube') { 
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }//withSonarQubeEnv
@@ -20,7 +20,7 @@ timestamps{
                     error "Pipeline aborted due to quality gate failure: ${qg.status}"
                 }//if
             }//timeout
-        }//stage
+        }//stage*/
         openshift.withCluster() {
             openshift.withProject('maven-backend-qa') {
                 stage('Create Build'){
