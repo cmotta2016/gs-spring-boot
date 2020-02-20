@@ -22,25 +22,47 @@ timestamps{
             }//timeout
         }//stage*/
         openshift.withCluster() {
-            openshift.withProject('maven-backend-qa') {
-                stage('Create Build'){
-                    echo "Criando build config da imagem final..."
-                    if (!openshift.selector("bc", "maven-spring").exists()) {
-                        openshift.newBuild("--name=maven-spring", "openshift/java", "--binary", "-l app=maven")
-                        def build = openshift.selector("bc", "maven-spring").startBuild("--from-dir=target")
+            openshift.withProject("${PROJECT}-qa") {
+                stage('Build Image'){
+                    echo "Creating Image"
+                    if (!openshift.selector("bc", "${NAME}").exists()) {
+                        openshift.newBuild("--name=${NAME}", "openshift/java", "--binary", "-l app=${LABEL}")
+                        def build = openshift.selector("bc", "${NAME}").startBuild("--from-dir=target")
                         build.logs('-f')
                     }//if
                     else {
-                        def build = openshift.selector("bc", "maven-spring").startBuild("--from-dir=target")
+                        def build = openshift.selector("bc", "${NAME}").startBuild("--from-dir=target")
                         build.logs('-f')
-                    }
+                    }//else
                     }//stage
+                stage('Tagging Image'){
+		    openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
+                    //openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
+                }//stage
+		stage('Deploy QA') {
+                    echo "Creating Secret Environments"
+                    sh 'cat environments common > .env_qa'
+                    def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
+                    envSecret.describe()
+		    echo "Applying Template QA"
+                    openshift.apply(openshift.process(readFile(file:'template.yml'), "--param-file=jenkins.properties"))
+		    echo "Starting Deployment QA"
+                    openshift.selector("dc", "${NAME}").rollout().latest()
+                    def dc = openshift.selector("dc", "${NAME}")
+                    dc.rollout().status()
+                }//stage
             }//withProject
-            openshift.withProject('maven-backend-hml') {
-                stage('Deploy') {
-                    openshift.tag("maven-backend-qa/maven-spring:latest", "maven-backend-hml/maven-spring:latest")
-                    openshift.selector("dc", "maven-spring").rollout().latest()
-                    def dc = openshift.selector("dc", "maven-spring")
+            openshift.withProject("${PROJECT}-hml") {
+                stage('Deploy HML') {
+                    echo "Creating Secret Environments"
+                    sh 'cat environments common > .env_hml'
+                    def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_hml --dry-run --output=yaml").actions[0].out)
+                    envSecret.describe()
+		    echo "Applying Template HML"
+                    openshift.apply(openshift.process(readFile(file:'template.yml'), "--param-file=jenkins.properties"))
+		    echo "Starting Deployment HML"
+                    openshift.selector("dc", "${NAME}").rollout().latest()
+                    def dc = openshift.selector("dc", "${NAME}")
                     dc.rollout().status()
                 }//stage
             }//withProject
