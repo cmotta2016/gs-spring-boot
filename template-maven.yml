@@ -154,3 +154,6 @@ parameters:
 - name: REPOSITORY
   displayName: Project repository containing images
   required: true
+- name: PROJECT
+  displayName: Project repository containing images
+  required: false
