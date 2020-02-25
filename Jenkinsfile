@@ -26,7 +26,7 @@ timestamps{
                 stage('Build Image'){
                     echo "Creating Image"
                     if (!openshift.selector("bc", "${NAME}").exists()) {
-                        openshift.newBuild("--name=${NAME}", "openshift/java", "--binary", "-l app=${LABEL}")
+                        openshift.newBuild("--name=${NAME}", "registry.redhat.io/openjdk/openjdk-8-rhel8", "--binary", "-l app=${LABEL}")
                         def build = openshift.selector("bc", "${NAME}").startBuild("--from-dir=target")
                         build.logs('-f')
                     }//if
