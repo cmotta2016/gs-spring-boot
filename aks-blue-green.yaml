@@ -1,0 +1,298 @@
+#kind: Namespace
+#apiVersion: v1
+#metadata:
+# name: nodejs-prd
+#spec:
+# finalizers:
+#  - kubernetes
+#---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: nodejs
+  namespace: nodejs-prd
+  labels:
+    app: nodejs
+    role: principal
+spec:
+  rules:
+    - host: nodejs.aks.linux4sysadmin.com.br
+      http:
+        paths:
+          - backend:
+              serviceName: nodejs-service
+              servicePort: 8080
+            path: /
+  tls:
+    - hosts:
+        - nodejs.aks.linux4sysadmin.com.br
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: nodejs-service
+ namespace: nodejs-prd
+ labels:
+   app: nodejs
+   role: principal
+spec:
+ selector:
+   app: nodejs
+   role: principal
+ ports:
+  - port: 8080
+    targetPort: 3000
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJjbW90dGEyMDE2LmF6dXJlY3IuaW8iOnsidXNlcm5hbWUiOiJjbW90dGEyMDE2IiwicGFzc3dvcmQiOiJBbWxUVG9jbWlaSldPNGVqODZXWC9NNXY5NlFBdGZ1dyIsImF1dGgiOiJZMjF2ZEhSaE1qQXhOanBCYld4VVZHOWpiV2xhU2xkUE5HVnFPRFpYV0M5Tk5YWTVObEZCZEdaMWR3PT0ifX19
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: acrregcred
+  namespace: nodejs-prd
+  labels:
+    app: nodejs
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: blue-nodejs
+  namespace: nodejs-prd
+  labels:
+    app: nodejs
+    role: blue
+spec:
+  rules:
+    - host: blue-nodejs.aks.linux4sysadmin.com.br
+      http:
+        paths:
+          - backend:
+              serviceName: blue-nodejs-service
+              servicePort: 8080
+            path: /
+  tls:
+    - hosts:
+        - blue-nodejs.aks.linux4sysadmin.com.br
+---
+# Blue Environment
+apiVersion: v1
+kind: Service
+metadata:
+ name: blue-nodejs-service
+ namespace: nodejs-prd
+ labels:
+   app: nodejs
+   role: blue
+spec:
+ selector:
+   app: nodejs
+   role: blue
+ ports:
+  - port: 8080
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ labels:
+   app: nodejs
+   role: blue
+ name: blue-nodejs
+ namespace: nodejs-prd
+ annotations:  
+   template.alpha.openshift.io/wait-for-ready: 'true'
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: nodejs
+   role: blue
+ template:
+  metadata:
+   labels:
+    app: nodejs
+    role: blue
+  spec:
+   imagePullSecrets:
+    - name: acrregcred
+   containers: 
+    - name: nodejs
+      image: " "
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: '1'
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 50Mi
+      ports:
+       - containerPort: 3000
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 10
+        timeoutSeconds: 2
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 30
+        timeoutSeconds: 2
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: blue-nodejs
+  namespace: nodejs-prd
+  labels:
+    app: nodejs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: blue-nodejs
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: green-nodejs
+  namespace: nodejs-prd
+  labels:
+    app: nodejs
+    role: green
+spec:
+  rules:
+    - host: green-nodejs.aks.linux4sysadmin.com.br
+      http:
+        paths:
+          - backend:
+              serviceName: green-nodejs-service
+              servicePort: 8080
+            path: /
+  tls:
+    - hosts:
+        - green-nodejs.aks.linux4sysadmin.com.br
+---
+# Green Environment
+apiVersion: v1
+kind: Service
+metadata:
+ name: green-nodejs-service
+ namespace: nodejs-prd
+ labels:
+   app: nodejs
+   role: green
+spec:
+ selector:
+   app: nodejs
+   role: green
+ ports:
+  - port: 8080
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ labels:
+   app: nodejs
+   role: green
+ name: green-nodejs
+ namespace: nodejs-prd
+ annotations:  
+   template.alpha.openshift.io/wait-for-ready: 'true'
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: nodejs
+   role: green
+ template:
+  metadata:
+   labels:
+    app: nodejs
+    role: green
+  spec:
+   imagePullSecrets:
+    - name: acrregcred
+   containers: 
+    - name: nodejs
+      image: " "
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: '1'
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 50Mi
+      ports:
+       - containerPort: 3000
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 10
+        timeoutSeconds: 2
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 30
+        timeoutSeconds: 2
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: green-nodejs
+  namespace: nodejs-prd
+  labels:
+    app: nodejs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: green-nodejs
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80

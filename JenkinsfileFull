@@ -1,4 +1,6 @@
 timestamps {
+    def tag="blue"
+    def altTag="green"
     node('nodejs') {
         stage('Checkout'){
             checkout scm
@@ -49,18 +51,12 @@ timestamps {
                 sh 'kubectl create -f aks-nodejs.yaml --validate=false -l env!=hml -n nodejs-qa'
                 sh 'kubectl set image deployment/nodejs nodejs=cmotta2016.azurecr.io/node-app:${BUILD_NUMBER} --record -n nodejs-qa'
             }
-            //sh 'kubectl wait --for=condition=Ready deployment/nodejs -n nodejs-qa'
             sh 'kubectl rollout status deployment.apps/nodejs -n nodejs-qa'
         }
-        /*stage('Promote to HML'){
-            //routeHost = sh(script: "kubectl get ingress nodejs -n nodejs-qa -o jsonpath='{ .spec.rules[0].host }'", returnStdout: true).trim()
+        stage('Promote to HML'){
             input message: "Promote to HML. Approve?", id: "approval"
-        }*/
-        stage('Test Deployment'){
-            routeHost = sh(script: "kubectl get ingress nodejs -n nodejs-qa -o jsonpath='{ .spec.rules[0].host }'", returnStdout: true).trim()
-            input message: "Test deployment: http://${routeHost}. Approve?", id: "approval"
         }
-        /*stage('Deploy HML'){
+        stage('Deploy HML'){
             def deployment = sh(script: "kubectl get deployment nodejs -n nodejs-hml -o jsonpath='{ .metadata.name }' --ignore-not-found", returnStdout: true).trim()
             if (deployment == "nodejs") {
                 sh 'kubectl set image deployment/nodejs nodejs=cmotta2016.azurecr.io/node-app:${BUILD_NUMBER} --record -n nodejs-hml'
@@ -69,12 +65,40 @@ timestamps {
                 sh "kubectl create -f aks-nodejs.yaml -n nodejs-hml --validate=false --dry-run -o yaml | sed 's/qa/hml/g' | kubectl apply --validate=false -f -"
                 sh 'kubectl set image deployment/nodejs nodejs=cmotta2016.azurecr.io/node-app:${BUILD_NUMBER} --record -n nodejs-hml'
             }
-            //sh 'kubectl wait --for=condition=Available deployment/nodejs -n nodejs --timeout=90s'
             sh 'kubectl rollout status deployment.apps/nodejs -n nodejs-hml'
         }
+        stage('Promote to PRD'){
+            input message: "Promote to PRD. Approve?", id: "approval"
+        }
+        stage('Deploy PRD'){
+            def svc = sh(script: "kubectl get svc nodejs-service -n nodejs-prd -o jsonpath='{ .spec.selector.role }' --ignore-not-found", returnStdout: true).trim()
+            if (svc == "blue"){
+                tag="green"
+                altTag="blue"
+                echo "Executando Rollout no Deployment ${tag}"
+                sh "kubectl set image deployment/${tag}-nodejs nodejs=cmotta2016.azurecr.io/node-app:${BUILD_NUMBER} --record -n nodejs-prd"
+                sh "kubectl rollout status deployment.apps/${tag}-nodejs -n nodejs-prd"
+            }
+            else {
+                if (svc == "green") {
+                    echo "Executando Rollout no Deployment ${tag}"
+                    sh "kubectl set image deployment/${tag}-nodejs nodejs=cmotta2016.azurecr.io/node-app:${BUILD_NUMBER} --record -n nodejs-prd"
+                    sh "kubectl rollout status deployment.apps/${tag}-nodejs -n nodejs-prd"
+                }
+                else {
+                    echo "Não Existe"
+                    sh 'kubectl apply -f aks-blue-green.yaml --validate=false -n nodejs-prd'
+                    sh "kubectl set image deployment/${tag}-nodejs nodejs=cmotta2016.azurecr.io/node-app:${BUILD_NUMBER} --record -n nodejs-prd"
+                    sh "kubectl rollout status deployment.apps/${tag}-nodejs -n nodejs-prd"
+                }
+            }
+        }
         stage('Test Deployment'){
-            routeHost = sh(script: "kubectl get ingress nodejs -n nodejs-qa -o jsonpath='{ .spec.rules[0].host }'", returnStdout: true).trim()
+            routeHost = sh(script: "kubectl get ingress ${tag}-nodejs -n nodejs-prd -o jsonpath='{ .spec.rules[0].host }'", returnStdout: true).trim()
             input message: "Test deployment: http://${routeHost}. Approve?", id: "approval"
-        }*/
+        }
+        stage('Go Live'){
+            sh """kubectl patch svc nodejs-service -n nodejs-prd --type='json' -p='[{"op": "replace", "path": "/spec/selector/role", "value":"${tag}"}]'"""
+        }
     }
 }
