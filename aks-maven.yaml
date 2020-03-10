@@ -1,0 +1,135 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: maven
+  labels:
+    app: maven
+    env: qa
+spec:
+  rules:
+    - host: maven-qa.aks.linux4sysadmin.com.br
+      http:
+        paths:
+          - backend:
+              serviceName: maven-service
+              servicePort: 8080
+            path: /
+  tls:
+    - hosts:
+        - maven-qa.aks.linux4sysadmin.com.br
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: maven-service
+ labels:
+   app: maven
+   env: qa
+spec:
+ selector:
+  app: maven
+  env: qa
+ ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: maven
+    env: qa
+  name: maven-logs
+spec:
+ accessModes:
+ - ReadWriteOnce
+ resources:
+   requests:
+     storage: 2Gi
+ storageClassName: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ labels:
+   app: maven
+   env: qa
+ name: maven
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: maven
+   env: qa
+ template:
+  metadata:
+   labels:
+     app: maven
+     env: qa
+  spec:
+   securityContext:
+    runAsUser: 0
+   volumes:
+    - name: maven-logs
+      persistentVolumeClaim:
+        claimName: maven-logs
+   containers: 
+    - name: maven
+      image: " "
+      ports:
+       - containerPort: 8080
+      volumeMounts:
+       - mountPath: /logs
+         name: maven-logs
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: '1'
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 50Mi
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 10
+        timeoutSeconds: 2
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 30
+        timeoutSeconds: 2
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 3
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: maven
+  labels:
+    app: maven
+    env: hml
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: maven
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target: 
+        type: Utilization
+        averageUtilization: 90

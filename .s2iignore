@@ -1,0 +1,8 @@
+*.yaml
+*npmrc
+Jenkinsfile*
+sonar*
+Dockerfile
+README.md
+.dockerignore
+.gitignore
