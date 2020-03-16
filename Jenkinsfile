@@ -71,7 +71,7 @@ timestamps{
             }//withProject
             openshift.withProject("${PROJECT}-prd") {
                 stage("Initialize Blue-Green Routes") {
-                    if (openshift.selector("route", "${NAME}").exists()) {
+                    if (openshift.selector("route", "${tag}-${NAME}").exists()) {
                       def activeService = openshift.raw("get route ${NAME} -o jsonpath='{ .spec.to.name }' --loglevel=4").out.trim()
                       if (activeService == "${NAME}-blue") {
                         tag = "green"
