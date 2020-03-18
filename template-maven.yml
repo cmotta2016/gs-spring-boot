@@ -26,7 +26,7 @@ objects:
   kind: Route
   metadata:
     annotations:
-      haproxy.router.openshift.io/ip_whitelist: 200.222.3.3
+      haproxy.router.openshift.io/ip_whitelist: 177.52.163.4
     labels:
       app: "${LABEL}"
     name: "${NAME}"
