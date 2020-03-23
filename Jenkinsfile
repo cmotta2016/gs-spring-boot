@@ -22,7 +22,7 @@ timestamps {
             }
         }
         stage('Build with S2I'){
-            sh 's2i build . cmotta2016/java-8-bases2i:latest cmotta2016.azurecr.io/maven:${BUILD_NUMBER} --loglevel 5 --network host --inject /opt/artifacts:/opt/jboss/container/maven/default'
+            sh 's2i build . cmotta2016/java-8-bases2i:latest cmotta2016.azurecr.io/maven:${BUILD_NUMBER} --loglevel 5 --assemble-user root --network host --volume /home/jenkins/repository:/tmp/artifacts/m2 --inject /opt/artifacts:/opt/jboss/container/maven/default'
         }
         stage('Push Image to ACR'){
             withCredentials([usernamePassword(credentialsId: 'acr-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
