@@ -67,8 +67,8 @@ timestamps{
                     openshift.selector("dc", "${NAME}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}")
                     dc.rollout().status()
-                }//stage
-            }//withProject*/
+                }//stage*/
+            }//withProject
             openshift.withProject("${PROJECT}-prd") {
                 stage("Initialize Blue-Green Routes") {
                     if (openshift.selector("route", "${tag}-${NAME}").exists()) {
@@ -109,4 +109,4 @@ timestamps{
             }//withProject
         }//withCluster
     }//node
-}//timestamps
+}//timestamp
