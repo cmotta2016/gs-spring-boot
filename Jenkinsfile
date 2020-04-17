@@ -42,7 +42,7 @@ timestamps{
 		    openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
                     //openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
                 }//stage
-		stage('Deploy QA') {
+		/*stage('Deploy QA') {
                     echo "Creating Secret Environments"
                     sh 'cat environments common > .env_qa'
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
@@ -68,7 +68,7 @@ timestamps{
                     def dc = openshift.selector("dc", "${NAME}")
                     dc.rollout().status()
                 }//stage
-            }//withProject
+            }//withProject*/
             openshift.withProject("${PROJECT}-prd") {
                 stage("Initialize Blue-Green Routes") {
                     if (openshift.selector("route", "${tag}-${NAME}").exists()) {
