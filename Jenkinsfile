@@ -72,7 +72,7 @@ timestamps{
                     sh 'cat environments common > .env_hml'
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_hml --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
-		    echo "Applying Template HML"
+		    echo "Applying Template PRD"
                     openshift.apply(openshift.process(readFile(file:'template-maven.yml'), "--param-file=jenkins.properties"))
 		    echo "Starting Deployment HML"
                     openshift.selector("dc", "${NAME}").rollout().latest()
