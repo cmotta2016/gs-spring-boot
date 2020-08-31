@@ -1,5 +1,5 @@
-LABEL=maven-backend
-NAME=maven-spring-v1
+LABEL=maven-backend-v1
+NAME=maven-backend-v1
 SECRET_ENV=environments
 REPOSITORY=imagens-maven
 PROJECT=maven-backend
