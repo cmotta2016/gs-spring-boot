@@ -1,4 +1,4 @@
 LABEL=maven-backend
-NAME=maven-backend-v1
+NAME=maven-spring-v1
 SECRET_ENV=environments
 REPOSITORY=imagens-maven
