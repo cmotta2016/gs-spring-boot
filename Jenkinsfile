@@ -13,8 +13,8 @@ timestamps{
             }//withSonarQubeEnv
         }//stage
         stage('Quality Gate'){
-            timeout(activity: true, time: 15, unit: 'SECONDS') {
-                sleep(10)
+            timeout(activity: true, time: 30, unit: 'SECONDS') {
+                sleep(30)
                 def qg = waitForQualityGate()
                 if (qg.status != 'OK') {
                     error "Pipeline aborted due to quality gate failure: ${qg.status}"
