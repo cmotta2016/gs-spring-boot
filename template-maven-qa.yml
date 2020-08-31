@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: maven-spring-template
+metadata:
+  name: maven-spring-template
+  annotations:  
+    template.alpha.openshift.io/wait-for-ready: 'true'
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: "${LABEL}"
+    name: "${NAME}"
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: "${LABEL}"
+      deploymentconfig: "${NAME}"
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    #annotations:
+      #haproxy.router.openshift.io/ip_whitelist: 177.52.163.4
+    labels:
+      app: "${LABEL}"
+    name: "${NAME}"
+  spec:
+    port:
+      targetPort: 8080-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: "${NAME}"
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: "${LABEL}"
+    name: "${NAME}-log"
+  spec:
+   accessModes:
+   - ReadWriteOnce
+   resources:
+     requests:
+       storage: 2Gi
+   storageClassName: glusterfs-storage
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: "${LABEL}"
+    name: "${NAME}"
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true" #Template instantiation will not complete until this object report ready
+  spec:
+    strategy:
+      type: "Recreate"
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: false
+        containerNames:
+        - "${NAME}"
+        from: 
+          kind: ImageStreamTag
+          name: "${NAME}:latest"
+          namespace: "${REPOSITORY}"
+      type: ImageChange
+    replicas: 1
+    selector:
+      app: "${LABEL}"
+      deploymentconfig: "${NAME}"
+    template:
+      metadata:
+        labels:
+          app: "${LABEL}"
+          deploymentconfig: "${NAME}"
+      spec:
+        volumes:
+        - name: "${NAME}-log"
+          persistentVolumeClaim:
+            claimName: "${NAME}-log"
+        containers:
+        - image: " "
+          name: "${NAME}"
+          envFrom:
+            - secretRef:
+                name: "${SECRET_ENV}"
+          resources:
+            limits:
+              cpu: '1'
+              memory: 2Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /logs
+              name: "${NAME}-log"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 360
+            timeoutSeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+parameters:
+- name: NAME
+  displayName: Name
+  description: The name assigned to all of the frontend objects defined in this template.
+  required: true
+- name: LABEL
+  displayName: App label
+  required: true
+  value: maven
+- name: SECRET_ENV
+  displayName: Secret environments name
+  required: true
+- name: REPOSITORY
+  displayName: Project repository containing images
+  required: true
+- name: PROJECT
+  displayName: Project repository containing images
+  required: false
