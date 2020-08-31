@@ -7,7 +7,7 @@ timestamps{
         stage('Compile'){
             sh 'mvn clean install'
         }//stage
-        /*stage('Code Quality'){
+        stage('Code Quality'){
             withSonarQubeEnv('SonarQube') { 
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }//withSonarQubeEnv
@@ -20,7 +20,7 @@ timestamps{
                     error "Pipeline aborted due to quality gate failure: ${qg.status}"
                 }//if
             }//timeout
-        }//stage*/
+        }//stage
         openshift.withCluster() {
             openshift.withProject("${PROJECT}-qa") {
                 stage('Build Image'){
@@ -71,20 +71,6 @@ timestamps{
                     dc.rollout().status()
                 }//stage
             }//withProject
-	    /*openshift.withProject("${PROJECT}-prd") {
-                stage('Deploy PRD') {
-                    echo "Creating Secret Environments"
-                    sh 'cat environments common > .env_hml'
-                    def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_hml --dry-run --output=yaml").actions[0].out)
-                    envSecret.describe()
-		    echo "Applying Template PRD"
-                    openshift.apply(openshift.process(readFile(file:'template-maven.yml'), "--param-file=jenkins.properties"))
-		    echo "Starting Deployment HML"
-                    openshift.selector("dc", "${NAME}").rollout().latest()
-                    def dc = openshift.selector("dc", "${NAME}")
-                    dc.rollout().status()
-                }//stage
-            }//withProject*/
         }//withCluster
     }//node
 }//timestamps
