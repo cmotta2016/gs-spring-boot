@@ -26,7 +26,7 @@ timestamps{
                 stage('Build Image'){
                     echo "Creating Image"
                     if (!openshift.selector("bc", "${NAME}").exists()) {
-                        openshift.newBuild("--name=${NAME}", "registry.redhat.io/openjdk/openjdk-8-rhel8", "--binary", "-l app=${LABEL}")
+                        openshift.newBuild("--name=${NAME}", "--image-stream=${IMAGE_BUILDER}", "--binary", "-l app=${LABEL}")
                         def build = openshift.selector("bc", "${NAME}").startBuild("--from-dir=target")
                         build.logs('-f')
                     }//if
@@ -45,7 +45,7 @@ timestamps{
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
 		            echo "Applying Template QA"
-                    openshift.apply(openshift.process(readFile(file:'template-maven.yml'), "--param-file=template_environments"))
+                    openshift.apply(openshift.process(readFile(file:"${TEMPLATE}-qa.yml"), "--param-file=template_environments"))
 		            echo "Starting Deployment QA"
                     openshift.selector("dc", "${NAME}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}")
@@ -64,7 +64,7 @@ timestamps{
                     def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_hml --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
 		    echo "Applying Template HML"
-                    openshift.apply(openshift.process(readFile(file:'template-maven.yml'), "--param-file=template_environments"))
+                    openshift.apply(openshift.process(readFile(file:"${TEMPLATE}-hml.yml"), "--param-file=template_environments"))
 		    echo "Starting Deployment HML"
                     openshift.selector("dc", "${NAME}").rollout().latest()
                     def dc = openshift.selector("dc", "${NAME}")
