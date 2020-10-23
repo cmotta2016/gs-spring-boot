@@ -7,11 +7,11 @@
         stage('Compile'){
             sh 'mvn clean install'
         }//stage
-        stage('Code Quality'){
+        /*stage('Code Quality'){
             withSonarQubeEnv('SonarQube') { 
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }//withSonarQubeEnv
-        }//stage
+        }//stage*/
         /*stage('Quality Gate'){
             timeout(activity: true, time: 30, unit: 'SECONDS') {
                 sleep(30)
