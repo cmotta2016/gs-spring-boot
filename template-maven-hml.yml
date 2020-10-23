@@ -39,19 +39,6 @@ objects:
     to:
       kind: Service
       name: "${NAME}"
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    labels:
-      app: "${LABEL}"
-    name: "${NAME}-log"
-  spec:
-   accessModes:
-   - ReadWriteOnce
-   resources:
-     requests:
-       storage: 2Gi
-   storageClassName: glusterfs-storage
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
@@ -84,10 +71,6 @@ objects:
           app: "${LABEL}"
           deploymentconfig: "${NAME}"
       spec:
-        volumes:
-        - name: "${NAME}-log"
-          persistentVolumeClaim:
-            claimName: "${NAME}-log"
         containers:
         - image: " "
           name: "${NAME}"
@@ -104,9 +87,6 @@ objects:
           ports:
             - containerPort: 8080
               protocol: TCP
-          volumeMounts:
-            - mountPath: /logs
-              name: "${NAME}-log"
           livenessProbe:
             httpGet:
               path: /
