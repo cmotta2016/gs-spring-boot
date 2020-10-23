@@ -1,7 +1,7 @@
 //timestamps{
     def tag="blue"
     def altTag="green"
-    def routeHost="${tag}-${NAME}-${PROJECT}-prd.apps.openshift.oracle.msdigital.pro"
+    def routeHost="${tag}-${NAME}-${PROJECT}-prd.apps.openshiftdig.rhv.msdigital.pro"
     node('maven'){
         stage('Checkout'){
            //checkout([$class: 'GitSCM', branches: [[name: '*/blue-green']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
