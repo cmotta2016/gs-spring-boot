@@ -97,9 +97,9 @@ objects:
           resources:
             limits:
               cpu: '1'
-              memory: 2Gi
+              memory: 1Gi
             requests:
-              cpu: 250m
+              cpu: 100m
               memory: 512Mi
           ports:
             - containerPort: 8080
