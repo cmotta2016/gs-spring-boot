@@ -12,7 +12,7 @@
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }//withSonarQubeEnv
         }//stage
-        stage('Quality Gate'){
+        /*stage('Quality Gate'){
             timeout(activity: true, time: 30, unit: 'SECONDS') {
                 sleep(30)
                 def qg = waitForQualityGate()
@@ -20,7 +20,7 @@
                     error "Pipeline aborted due to quality gate failure: ${qg.status}"
                 }//if
             }//timeout
-        }//stage
+        }//stage*/
         openshift.withCluster() {
             openshift.withProject("${PROJECT}-qa") {
                 stage('Build Image'){
