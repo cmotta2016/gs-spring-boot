@@ -1,5 +1,5 @@
 LABEL=maven-backend-v1
 NAME=maven-backend-v1
 SECRET_ENV=environments
-REPOSITORY=imagens-microservicos
-PROJECT=maven-backend
+REPOSITORY=digital-imagens-microservicos
+PROJECT=digital-maven-backend
