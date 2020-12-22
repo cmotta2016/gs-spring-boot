@@ -4,14 +4,14 @@
            //checkout([$class: 'GitSCM', branches: [[name: '*/openshift']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
            checkout scm
         }//stage
-        stage('Compile'){
+        /*stage('Compile'){
             sh 'mvn clean install'
         }//stage
         stage('Code Quality'){
             withSonarQubeEnv('SonarQube') { 
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }//withSonarQubeEnv
-        }//stage
+        }//stage*/
         /*stage('Quality Gate'){
             timeout(activity: true, time: 30, unit: 'SECONDS') {
                 sleep(30)
@@ -23,7 +23,7 @@
         }//stage*/
         openshift.withCluster() {
             openshift.withProject("${PROJECT}-qa") {
-                stage('Build Image'){
+                /*stage('Build Image'){
                     echo "Creating Image"
                     if (!openshift.selector("bc", "${NAME}").exists()) {
                         openshift.newBuild("--name=${NAME}", "--image-stream=${IMAGE_BUILDER}", "--binary", "-l app=${LABEL}")
@@ -38,13 +38,17 @@
                 stage('Tagging Image'){
 		            openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
                     //openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
-                }//stage
-        		stage('Deploy QA') {
+                }//stage*/
+        	stage('Deploy QA') {
                     echo "Creating Secret Environments"
                     sh 'cat environments common > .env_qa'
-                    def envSecret = openshift.apply(openshift.raw("create secret  generic environments --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
+                    def envSecret = openshift.apply(openshift.raw("create secret generic env-secret --from-env-file=.env_qa --dry-run --output=yaml").actions[0].out)
                     envSecret.describe()
-		            echo "Applying Template QA"
+                    echo "Creating Configmap Environments"
+                    //sh 'cat environments common > .env_qa'
+                    def envConfigMap = openshift.apply(openshift.raw("create configmap env-configmap --from-env-file=env/qa.env --dry-run --output=yaml").actions[0].out)
+                    envConfigMap.describe()
+		    echo "Applying Template QA"
                     openshift.apply(openshift.process(readFile(file:"${TEMPLATE}-qa.yml"), "--param-file=template_environments"))
 		            echo "Starting Deployment QA"
                     openshift.selector("dc", "${NAME}").rollout().latest()
