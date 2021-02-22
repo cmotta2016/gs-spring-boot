@@ -5,7 +5,7 @@
            checkout scm
         }//stage
         stage('Compile'){
-	    sh 'sleep 300'
+	    //sh 'sleep 300'
             sh 'mvn clean install'
         }//stage
         stage('Code Quality'){
