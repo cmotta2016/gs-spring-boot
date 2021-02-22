@@ -4,14 +4,14 @@
            //checkout([$class: 'GitSCM', branches: [[name: '*/openshift']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cmotta2016/gs-spring-boot.git']]])
            checkout scm
         }//stage
-        /*stage('Compile'){
+        stage('Compile'){
             sh 'mvn clean install'
         }//stage
         stage('Code Quality'){
             withSonarQubeEnv('SonarQube') { 
                 sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.6.0.1398:sonar'
             }//withSonarQubeEnv
-        }//stage*/
+        }//stage
         /*stage('Quality Gate'){
             timeout(activity: true, time: 30, unit: 'SECONDS') {
                 sleep(30)
