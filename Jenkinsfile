@@ -24,7 +24,7 @@
         }//stage*/
         openshift.withCluster() {
             openshift.withProject("${PROJECT}-qa") {
-                /*stage('Build Image'){
+                stage('Build Image'){
                     echo "Creating Image"
                     if (!openshift.selector("bc", "${NAME}").exists()) {
                         openshift.newBuild("--name=${NAME}", "--image-stream=${IMAGE_BUILDER}", "--binary", "-l app=${LABEL}")
@@ -39,7 +39,7 @@
                 stage('Tagging Image'){
 		            openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:latest")
                     //openshift.tag("${NAME}:latest", "${REPOSITORY}/${NAME}:${tag}")
-                }//stage*/
+                }//stage
         	stage('Deploy QA') {
                     echo "Creating Secret Environments"
                     sh 'cat environments common > .env_qa'
